@@ -1,5 +1,5 @@
 """This module is resposible for encopassing the all the models related to the auth system"""
-import datetime
+from datetime import datetime
 from ..database.db import db
 
 
@@ -11,7 +11,7 @@ class User(db.Model):
     password = db.Column(db.Text(), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.now())
     updated_at = db.Column(db.DateTime, onupdate=datetime.now())
-    bookmarks = db.Relationship('Bookmark', backref="user")
+    # bookmarks = db.relationship("Bookmark", backref="user")
 
 
     def __repr__(self) -> str:

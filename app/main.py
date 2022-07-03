@@ -23,6 +23,7 @@ def create_app(test_config=None):
     
     db.app = app
     db.init_app(app)
+    db.create_all()
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(bookmarks_blueprint)
 

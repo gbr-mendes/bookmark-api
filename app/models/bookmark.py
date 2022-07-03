@@ -1,5 +1,5 @@
 """This module is responsible for encopassing all the models for the bookmarks system"""
-import datetime
+from datetime import datetime
 from ..database.db import db
 from ..utils.utils import generate_short_characters
 
@@ -18,7 +18,7 @@ class Bookmark(db.Model):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.short_url = self.generate_short_characters()
+        self.short_url = self.generate_short_url()
 
     def __repr__(self) -> str:
         """This method is resposible for the string respresentation of a bookmark"""
