@@ -1,9 +1,10 @@
 """This module is resposible for encopassing all the controller of the auth system"""
 from flask import request, jsonify
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from ..models.auth import User
-from ..constants.http_status_codes import HTTP_400_BAD_REQUEST, HTTP_415_UNSUPPORTED_MEDIA_TYPE
+from ..constants.http_status_codes import HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST, HTTP_415_UNSUPPORTED_MEDIA_TYPE, HTTP_500_INTERNAL_SERVER_ERROR
 from ..utils import auth_validation
 from ..database.db import db
 
@@ -43,7 +44,44 @@ def register():
         return {"error": "An unexpected error has occured"}, 500
     
 
+def login():
+    """This function handle the login of the user retriving a JWT for a valid user"""
+    data = request.json
+    email = data.get("email", "")
+    password = data.get("password", "")
 
+    user = User.query.filter_by(email=email).first()
+
+    if user:
+        is_password_valid = check_password_hash(user.password, password)
+
+        if is_password_valid:
+            refresh = create_refresh_token(identity=user.id)
+            access = create_access_token(identity=user.id)
+
+            return {"refresh_token": refresh, "access_token": access}, HTTP_200_OK
+    else:
+        return {"error": "Email or password incorrect"}, HTTP_400_BAD_REQUEST
+
+
+@jwt_required(refresh=True)
+def refresh_token():
+    """Controller for refresh the access token"""
+    user_id = get_jwt_identity()
+    access = create_access_token(identity=user_id)
+
+    return {"access_token": access}, HTTP_200_OK
+
+@jwt_required()
 def me():
     """This function is resposible get the logged user info"""
-    return {"user": "me"}
+    user_id = get_jwt_identity()
+    try:
+        user = User.query.filter_by(id=user_id).first()
+        return {
+            "id": user.id,
+            "username": user.username,
+            "email": user.email
+        }, HTTP_200_OK
+    except Exception:
+        return {"error": "An error has occurred when retriving the user"}, HTTP_500_INTERNAL_SERVER_ERROR

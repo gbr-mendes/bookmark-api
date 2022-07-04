@@ -6,4 +6,6 @@ from ..controllers import auth
 auth_blueprint = Blueprint("auth", __name__, url_prefix=f"{MAIN_URL_PREFIX}/auth")
 
 auth_blueprint.post("/register")(auth.register)
+auth_blueprint.post("/login")(auth.login)
+auth_blueprint.get("/token/refresh")(auth.refresh_token)
 auth_blueprint.get("/me")(auth.me)
